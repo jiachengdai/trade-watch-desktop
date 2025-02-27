@@ -15,7 +15,7 @@
     >
       交易行为数据可视化
     </div>
-    <div id="top-nums" style="display: flex; margin-left: 50px">
+    <div id="top-nums" style="display: flex; margin-left: 50px; margin-top: 20px">
       <div class="top-num-box" v-for="i in 5">
         <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
         <div class="top-num-text">
@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <div id="graphs" style="margin-top: 30px; display: flex; margin-left: 20px">
+    <div id="graphs" style="margin-top: 50px; display: flex; margin-left: 20px">
       <div class="boxes" style="width: 300px; height: 500px">
         <div class="main" style="width: 260px; height: 490px; margin-left: 8px">
           <div></div>
@@ -346,7 +346,7 @@ onMounted(() => {
   margin-top: 5px;
   margin-left: 5px;
   width: 1335px;
-  height: 700px;
+  height: 765px;
   background: url("../../assets/background.png") no-repeat center center fixed;
   background-size: cover;
   overflow-y: auto;

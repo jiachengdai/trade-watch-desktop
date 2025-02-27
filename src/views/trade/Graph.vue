@@ -34,7 +34,7 @@
         style="
           width: 1200px;
           padding-left: 5px;
-          height: 530px;
+          height: 600px;
           display: flex;
           flex-wrap: wrap;
           margin-left: 40px;
@@ -101,7 +101,7 @@
     v-model="fixDialogVisible"
     width="1100px"
     top="40px"
-    style="height: 650px"
+    style="height: 650px; top: 60px"
   >
     <div style="display: flex">
       <div
@@ -709,12 +709,12 @@ onMounted(() => {
   margin-top: 5px;
   margin-left: 5px;
   width: 1335px;
-  height: 700px;
+  height: 750px;
   background-color: rgb(250, 251, 252);
 }
 .innerContainer {
   width: 1250px;
-  height: 630px;
+  height: 700px;
   background-color: white;
   margin-top: 20px;
   margin-left: 50px;

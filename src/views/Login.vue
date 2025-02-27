@@ -1,19 +1,19 @@
 <template>
   <div style="display: flex">
-    <div style="width: 760px; height: 770px">
+    <div style="width: 800px; height: 825px">
       <img
         src="../assets/logo-bg.png"
-        style="width: 760px; height: 100%; border-radius: 10px"
+        style="width: 800px; height: 100%; border-radius: 10px"
       />
     </div>
-    <div style="width: 700px; height: 745px">
+    <div style="width: 700px; height: 825px">
       <div
         style="
           font-weight: 900;
 
           color: rgb(16, 137, 211);
           font-size: 40px;
-          margin-top: 100px;
+          margin-top: 170px;
           margin-bottom: 40px;
           margin-left: 200px;
           font-family: '阿里妈妈数黑体';

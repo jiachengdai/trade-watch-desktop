@@ -2,8 +2,8 @@ const { app, BrowserWindow } = require('electron')
 
 const createWindow = () => {
   const win = new BrowserWindow({  
-    width: 1920,  
-    height: 1080,  
+    width: 2800,  
+    height: 1700,  
     show: false, // 不立即显示窗口  
     autoHideMenuBar: true ,// 可选：隐藏菜单栏  
     icon: './src/assets/logo-bg.png',

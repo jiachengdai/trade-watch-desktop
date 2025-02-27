@@ -5,7 +5,7 @@
     <div
       style="
         width: 950px;
-        min-height: 630px;
+        min-height: 750px;
         border-top-left-radius: 10px;
         border-bottom-left-radius: 10px;
       "
@@ -24,13 +24,13 @@
           </el-button>
         </div>
       </div>
-      <div style="width: 950px; height: 500px">
+      <div style="width: 950px; height: 560px">
         <div>
           <svg
             ref="svg"
             width="940"
-            height="490"
-            style="font-family: '阿里妈妈东方大楷'"
+            height="550"
+            style="font-family: '阿里妈妈东方大楷'; border-radius: 10px"
           ></svg>
           <!-- <button @click="fetchData">加载数据</button> -->
           <div id="tooltip" class="tooltip" ref="tooltip"></div>
@@ -167,7 +167,7 @@
       <div
         style="
           width: 375px;
-          height: 435px;
+          height: 490px;
           border-bottom-right-radius: 10px;
           overflow-y: auto;
           scrollbar-width: thin;
@@ -467,7 +467,7 @@ onMounted(() => {
   margin-top: 5px;
   margin-left: 5px;
   width: 1335px;
-  height: 700px;
+  height: 760px;
   background-color: rgb(250, 251, 252);
   overflow-y: auto;
 }

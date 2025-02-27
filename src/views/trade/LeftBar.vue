@@ -65,16 +65,16 @@ const currentRoute = computed(() => route.path);
 <style scoped>
 .left-bar {
   width: 100px;
-  height: 760px;
+  height: 830px;
   background-color: #ffffff;
   box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.2);
 }
 .logo-container {
-  margin-top: 20px;
+  margin-top: 100px;
   margin-left: 28px;
 }
 .router-buttons {
-  margin-top: 140px;
+  margin-top: 170px;
   margin-left: 28px;
 }
 .router-button {

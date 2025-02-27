@@ -24,7 +24,7 @@
         <el-table
           :data="tableData"
           style="width: 100%; font-family: '华文中宋'; font-size: 16px"
-          max-height="520"
+          max-height="680"
         >
           <el-table-column fixed prop="date" label="报告名称" width="380" />
           <el-table-column prop="name" label="检测日期" width="220" />
@@ -103,7 +103,7 @@ const deleteRow = (index: number) => {
 }
 .innerContainer {
   width: 1250px;
-  min-height: 630px;
+  min-height: 700px;
   background-color: white;
   margin-top: 20px;
   margin-left: 50px;

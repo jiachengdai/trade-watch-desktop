@@ -146,9 +146,9 @@
           style="
             background-color: #0089ff12;
             border-radius: 10px;
-            margin-top: 10px;
+            margin-top: 40px;
             padding-top: 15px;
-            min-height: 482px; ;
+            min-height: 530px; ;
           "
         >
           <div v-if="currentPage == 2">
@@ -195,7 +195,7 @@
             <div
               style="
                 width: 1200px;
-                height: 380px;
+                height: 400px;
                 overflow-y: hidden;
                 margin-top: 10px;
                 padding-top: 15px;
@@ -487,19 +487,17 @@ const submmit = () => {
   margin-top: 5px;
   margin-left: 5px;
   width: 1335px;
-  height: 700px;
+  height: 760px;
   background-color: rgb(250, 251, 252);
 }
 .innerContainer {
   width: 1250px;
-  min-height: 630px;
+  min-height: 700px;
   background-color: white;
   margin-top: 20px;
   margin-left: 50px;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-  margin-bottom: 30px;
-  padding-bottom: 20px;
 }
 .personality-button {
   background-color: #2196f3; /* Green */

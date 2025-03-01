@@ -33,12 +33,12 @@
         <el-input v-model="form.name" placeholder="请输入您的姓名"></el-input>
       </el-form-item>
 
-      <el-form-item label="联系方式" prop="contact">
-        <el-input v-model="form.contact" placeholder="请输入您的联系方式"></el-input>
+      <el-form-item label="联系方式" prop="tel">
+        <el-input v-model="form.tel" placeholder="请输入您的联系方式"></el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">提交</el-button>
+        <el-button type="primary" @click="updateUserInfo">提交</el-button>
         <el-button style="margin-left: 10px" @click="resetForm">重置</el-button>
       </el-form-item>
     </el-form>
@@ -57,6 +57,8 @@ import { useTokenStore } from "@/stores/token";
 import { ElMessage } from "element-plus";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { updateUserInfoService } from "@/api/user";
+import { onMounted } from "vue";
 const selfDialogVisible = ref(false);
 const logoutVisible = ref(false);
 const tokenStore = useTokenStore();
@@ -64,7 +66,7 @@ const accountStore = useAccountInfoStore();
 const router = useRouter();
 const form = ref({
   name: "",
-  contact: "",
+  tel: "",
 });
 const handleLogout = () => {
   tokenStore.removeToken();
@@ -78,6 +80,20 @@ const resetForm = () => {
   form.value.name = "";
   form.value.contact = "";
 };
+const updateUserInfo = async () => {
+  let result = await updateUserInfoService(form.value);
+  ElMessage.success("更新成功");
+  selfDialogVisible.value = false;
+};
+import { getUserInfoService } from "@/api/user";
+const getUserInfo = async () => {
+  let result = await getUserInfoService();
+  form.value = result.data;
+  console.log(result.data);
+};
+onMounted(() => {
+  getUserInfo();
+});
 </script>
 <style scoped>
 .topBar {

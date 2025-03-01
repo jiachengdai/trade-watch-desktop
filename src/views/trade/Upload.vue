@@ -374,16 +374,22 @@ import { useRouter } from "vue-router";
 const fileInput = ref(null); // 创建一个引用来访问文件输入元素
 const fileName = ref("");
 const fileSize = ref("");
+const fileUrl = ref("");
 const router = useRouter();
 const currentPage = ref(1);
 // 函数：模拟点击文件输入
 const triggerFileInput = () => {
   fileInput.value.click();
 };
-
+import { addFileService } from "@/api/file";
+const addFile = async (filename, fileurl) => {
+  let result = await addFileService(filename, fileurl);
+  console.log("1");
+};
 // 函数：处理文件上传
+let file = null;
 const uploadFile = async (event) => {
-  const file = event.target.files[0];
+  file = event.target.files[0];
   if (file) {
     console.log("选择的文件:", file.name);
     fileName.value = file.name;
@@ -393,6 +399,8 @@ const uploadFile = async (event) => {
     formData.append("file", file);
     let result = await uploadService(formData);
     console.log(result.data);
+    addFile(file.name, result.data);
+    fileUrl.value = result.data;
     const container = document.querySelector(".innerContainer");
     if (container) {
       container.style.transition = "opacity 0.5s ease";
@@ -470,15 +478,22 @@ const backToOne = () => {
     currentPage.value = 1;
   }
 };
-
+import { newApplyService } from "@/api/apply";
 const submmitDialogVisible = ref(false);
 const selectedAlgorithm = ref("无");
 const allowDataRecord = ref("否");
-const submmit = () => {
+const submmit = async () => {
   submmitDialogVisible.value = false;
   ElMessage.success("提交成功");
+
   currentPage.value = 1;
   router.push("/trade/analysis");
+  let result = await newApplyService(
+    file,
+    currentItem.value,
+    selectedAlgorithm.value,
+    allowDataRecord.value
+  );
 };
 </script>
 

@@ -122,6 +122,7 @@ const login = async () => {
 
   let result1 = await accountInfoService(LoginUserInfoForm.username);
   accountStore.setInfo(result1.data);
+  console.log(result1.data);
   router.push("/trade/dash");
 };
 const checkUsername = (username) => {

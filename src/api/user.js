@@ -16,4 +16,14 @@ export const uploadService=(formData)=>{
     },
   })
 }
+export const updateUserInfoService=(userInfo)=>{
+    const params=new URLSearchParams();
+    for(let key in userInfo){
+        params.append(key,userInfo[key])
+    }
+    return request.put('/user/update',params);
+}
+export const getUserInfoService=()=>{
+    return request.get('/user/info')
+} 
 

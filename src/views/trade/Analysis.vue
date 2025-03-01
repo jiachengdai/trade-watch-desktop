@@ -26,10 +26,24 @@
           style="width: 100%; font-family: '华文中宋'; font-size: 16px"
           max-height="680"
         >
-          <el-table-column fixed prop="date" label="报告名称" width="380" />
-          <el-table-column prop="name" label="检测日期" width="220" />
-          <el-table-column prop="state" label="风险数" width="220" />
-          <el-table-column prop="city" label="风险等级" width="150" />
+          <el-table-column fixed prop="reportname" label="报告名称" width="380">
+            <template #default="scope">
+              <span>
+                {{
+                  scope.row.reportname.length > 25
+                    ? scope.row.reportname.substring(0, 25) + "……"
+                    : scope.row.reportname
+                }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="updatetime" label="检测日期" width="220" />
+          <el-table-column prop="dangernum" label="风险数" width="220" />
+          <el-table-column prop="grade" label="风险等级" width="150">
+            <template #default="scope">
+              <span v-for="n in scope.row.grade" :key="n">⭐</span>
+            </template>
+          </el-table-column>
 
           <el-table-column fixed="right" label="操作" min-width="220">
             <template #default="scope">
@@ -37,7 +51,7 @@
                 link
                 type="primary"
                 size="small"
-                @click.prevent="deleteRow(scope.$index)"
+                @click="downloadReport(scope.row.reportUrl)"
                 style="font-size: 14px; font-family: '华文中宋'"
               >
                 下载报告
@@ -63,34 +77,28 @@
 import { ref } from "vue";
 import dayjs from "dayjs";
 import { useRouter } from "vue-router";
-
+import { getAllReportsService } from "@/api/report";
+import { onMounted } from "vue";
 const now = new Date();
 const router = useRouter();
 
-const tableData = ref([
-  {
-    date: "关于XXXXX的XXX数据",
-    name: "2021-01-01",
-    state: "20",
-    city: "高风险",
-  },
-  {
-    date: "关于XXXXX的XXX数据",
-    name: "2021-01-01",
-    state: "20",
-    city: "高风险",
-  },
-  {
-    date: "关于XXXXX的XXX数据",
-    name: "2021-01-01",
-    state: "20",
-    city: "高风险",
-  },
-]);
+const tableData = ref([]);
 
 const deleteRow = (index: number) => {
   tableData.value.splice(index, 1);
 };
+const getAllReports = async () => {
+  let result = await getAllReportsService();
+  tableData.value = result.data;
+  console.log(tableData.value);
+};
+const downloadReport = (reportUrl) => {
+  console.log(reportUrl);
+  window.open(reportUrl);
+};
+onMounted(() => {
+  getAllReports();
+});
 </script>
 
 <style scoped>

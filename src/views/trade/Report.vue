@@ -256,15 +256,27 @@ const nodes = ref([]);
 const links = ref([]);
 const simulation = ref(null);
 import { getGraphService } from "@/api/report.js";
+import { getEdges, getNodes } from "@/api/graph.js";
 const fetchData = async () => {
   try {
-    let response = await getGraphService();
+    nodes.value = [];
+    links.value = [];
+    let result1 = await getEdges(1);
+    let result2 = await getNodes(1);
+    const savedNodes = result2.data;
+    const savedLinks = result1.data;
 
-    nodes.value = response.data;
-    links.value = [
-      { source: "Alice", target: "Bob", relationship: "FRIENDS_WITH" },
-      { source: "Alice", target: "Charlie", relationship: "FRIENDS_WITH" },
-    ];
+    for (let i = 0; i < savedNodes.length; i++) {
+      nodes.value.push(savedNodes[i]);
+    }
+    for (let i = 0; i < savedLinks.length; i++) {
+      savedLinks[i].source = savedNodes.find((n) => n.id === savedLinks[i].source.id);
+      savedLinks[i].target = savedNodes.find((n) => n.id === savedLinks[i].target.id);
+      savedLinks[i].id = savedLinks[i].relationshipId;
+      savedLinks[i].relationship = savedLinks[i].relationshipName;
+      savedLinks[i].weight = savedLinks[i].relationshipWeight;
+      links.value.push(savedLinks[i]);
+    }
     drawGraph();
   } catch (error) {
     console.error(error);

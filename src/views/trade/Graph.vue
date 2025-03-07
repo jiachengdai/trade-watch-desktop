@@ -24,7 +24,7 @@
             type="success"
             circle
             style="margin-left: 730px"
-            @click="fixDialogVisible = true"
+            @click="newSubGraphDialog()"
             >+</el-button
           >
         </div>
@@ -45,12 +45,12 @@
         <div
           class="graph-item"
           style="position: relative"
-          v-for="n in 10"
-          :key="n"
-          @click="fixDialogVisible = true"
+          v-for="subGraph in subGraphList"
+          :key="subGraph.gid"
+          @click="openSubGraph(subGraph.gid)"
         >
           <img
-            src="../../assets/image.png"
+            :src="subGraph.preview"
             width="100%"
             height="100%"
             style="border-radius: 10px"
@@ -77,7 +77,7 @@
                   margin-left: 15px;
                 "
               >
-                洗钱
+                {{ subGraph.title }}
               </div>
               <div
                 style="
@@ -88,7 +88,7 @@
                   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
                 "
               >
-                风险等级 ：⭐⭐⭐⭐⭐
+                风险等级 ：{{ "⭐".repeat(subGraph.level) }}
               </div>
             </div>
           </div>
@@ -296,15 +296,26 @@
             label-position="top"
             label-width="120px"
             style="font-family: '华文中宋'"
+            v-model="graphInfo"
           >
             <el-form-item label="模式名称">
-              <el-input placeholder="请输入模式名称" style="font-size: 16px"></el-input>
+              <el-input
+                placeholder="请输入模式名称"
+                style="font-size: 16px"
+                v-model="graphInfo.title"
+              ></el-input>
             </el-form-item>
             <el-form-item label="风险等级">
-              <el-select placeholder="选择风险等级" style="font-size: 16px">
-                <el-option label="低风险" value="low"></el-option>
-                <el-option label="中风险" value="medium"></el-option>
-                <el-option label="高风险" value="high"></el-option>
+              <el-select
+                placeholder="选择风险等级"
+                style="font-size: 16px"
+                v-model="graphInfo.level"
+              >
+                <el-option label="一星级" value="1"></el-option>
+                <el-option label="二星级" value="2"></el-option>
+                <el-option label="三星级" value="3"></el-option>
+                <el-option label="四星级" value="4"></el-option>
+                <el-option label="五星级" value="5"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="描述">
@@ -313,14 +324,28 @@
                 placeholder="请输入描述"
                 style="font-size: 16px"
                 :autosize="{ minRows: 6, maxRows: 6 }"
+                v-model="graphInfo.description"
               ></el-input>
             </el-form-item>
             <el-form-item style="text-align: right">
-              <el-button type="primary" @click="saveParams" style="font-size: 16px"
+              <el-button
+                v-if="cur_state == 1"
+                type="primary"
+                @click="refixParams()"
+                style="font-size: 16px"
                 >保存</el-button
               >
-              <el-button @click="resetParams" style="font-size: 16px; margin-left: 10px"
-                >重置</el-button
+              <el-button
+                v-if="cur_state == 0"
+                type="primary"
+                @click="saveParams"
+                style="font-size: 16px"
+                >新增</el-button
+              >
+              <el-button
+                @click="fixDialogVisible = false"
+                style="font-size: 16px; margin-left: 10px"
+                >取消</el-button
               >
             </el-form-item>
           </el-form>
@@ -332,8 +357,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import * as d3 from "d3";
+import { ElMessage } from "element-plus";
+import {
+  saveSubGraphService,
+  getLatestGraphId,
+  subGraphInfo,
+  updateSubGraphService,
+} from "@/api/graph.js";
 const fixDialogVisible = ref(false);
-
+const cur_graph_id = ref(0);
 // 定义引用和状态变量
 const svg = ref(null);
 const nodes = ref([]);
@@ -364,7 +396,101 @@ const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 const linkContextMenuX = ref(0);
 const linkContextMenuY = ref(0);
+const subGraphList = ref([]);
+const cur_state = ref(0); //0表示新增，1表示修改
+const graphInfo = ref({
+  title: "",
+  level: "",
+  description: "",
+  preview: "",
+});
+const generatePreview = async () => {
+  const svgElement = svg.value;
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(svgElement);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  const image = new Image();
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
 
+  return new Promise((resolve) => {
+    image.onload = () => {
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0);
+      URL.revokeObjectURL(url);
+
+      const imgData = canvas.toDataURL("image/png");
+      graphInfo.value.preview = imgData;
+      console.log(graphInfo.value);
+      resolve();
+    };
+    image.src = url;
+  });
+};
+const saveParams = async () => {
+  await generatePreview();
+  let result = await saveSubGraphService(graphInfo.value);
+  ElMessage.success("保存成功");
+  fixDialogVisible.value = false;
+  getAllSubGraphs();
+};
+const refixParams = async () => {
+  await generatePreview();
+  let result = await updateSubGraphService(graphInfo.value, cur_graph_id.value);
+  ElMessage.success("更新成功");
+  fixDialogVisible.value = false;
+
+  getAllSubGraphs();
+};
+const openSubGraph = async (graph_id) => {
+  cur_state.value = 1;
+  fixDialogVisible.value = true;
+  cur_graph_id.value = graph_id;
+  console.log(cur_graph_id.value);
+  getEdgesAndNodes(cur_graph_id.value);
+  let result = await subGraphInfo(cur_graph_id.value);
+  graphInfo.value = result.data;
+};
+const newSubGraphDialog = async () => {
+  nodes.value = [];
+  links.value = [];
+  updateGraph();
+  cur_state.value = 0;
+  fixDialogVisible.value = true;
+
+  graphInfo.value = {
+    title: "",
+    level: "",
+    description: "",
+  };
+  let result = await getLatestGraphId();
+  cur_graph_id.value = result.data;
+  console.log(cur_graph_id.value);
+};
+import { getEdges, getNodes } from "@/api/graph.js";
+const getEdgesAndNodes = async () => {
+  nodes.value = [];
+  links.value = [];
+  let result1 = await getEdges(cur_graph_id.value);
+  let result2 = await getNodes(cur_graph_id.value);
+  const savedNodes = result2.data;
+  const savedLinks = result1.data;
+
+  for (let i = 0; i < savedNodes.length; i++) {
+    nodes.value.push(savedNodes[i]);
+  }
+  for (let i = 0; i < savedLinks.length; i++) {
+    savedLinks[i].source = savedNodes.find((n) => n.id === savedLinks[i].source.id);
+    savedLinks[i].target = savedNodes.find((n) => n.id === savedLinks[i].target.id);
+    savedLinks[i].id = savedLinks[i].relationshipId;
+    savedLinks[i].name = savedLinks[i].relationshipName;
+    savedLinks[i].weight = savedLinks[i].relationshipWeight;
+    links.value.push(savedLinks[i]);
+  }
+  updateGraph();
+};
 // 显示新增结点对话框
 const showAddNodeDialog = () => {
   isDialogVisible.value = true;
@@ -472,15 +598,25 @@ const hideEditLinkDialog = () => {
   isEditLinkDialogVisible.value = false;
   linkToEdit.value = null;
 };
-
-// 新增结点
+import { runCQLService } from "@/api/graph.js";
+const runCQL = async (cqls) => {
+  let result = await runCQLService(cqls);
+};
 const addNode = () => {
-  nodes.value.push({
+  const newNode = {
     id: nodes.value.length,
     name: newNodeName.value,
     age: newNodeAge.value,
     color: getRandomLightColor(),
-  });
+  };
+  nodes.value.push(newNode);
+  console.log(nodes.value);
+  // 生成CQL语句
+  const cql1 = `CREATE (n:Node {id: ${newNode.id} ,gid:${cur_graph_id.value} ,name: '${newNode.name}', age: ${newNode.age}, color: '${newNode.color}'})`;
+  console.log(cur_graph_id.value);
+  const cql2 = ` MATCH (g:Graph {graph_id: ${cur_graph_id.value}}), (n:Node {id: ${newNode.id},gid:${cur_graph_id.value}}) CREATE (g)-[:CONTAINS]->(n)`;
+  const cqlList = [cql1, cql2];
+  runCQL(cqlList);
   hideAddNodeDialog();
   updateGraph();
 };
@@ -488,12 +624,22 @@ const addNode = () => {
 // 新增关系
 const addLink = () => {
   if (sourceNode.value && targetNode.value) {
-    links.value.push({
+    console.log(sourceNode.value.id);
+    const newLink = {
       source: sourceNode.value,
       target: targetNode.value,
       name: linkName.value,
       weight: linkWeight.value,
-    });
+    };
+
+    links.value.push(newLink);
+    console.log(links.value);
+    // 生成CQL语句
+    const cql = `MATCH  (a:Node {id: ${sourceNode.value.id},gid:${cur_graph_id.value}}), (b:Node {id: ${targetNode.value.id},gid:${cur_graph_id.value}}) CREATE (a)-[r:RELATION {name: '${linkName.value}', weight: ${linkWeight.value}}]->(b)`;
+    console.log(cql);
+    const cqlList = [cql];
+    // 你可以在这里发送CQL语句到服务器
+    runCQL(cqlList);
     hideAddLinkDialog();
     updateGraph();
   }
@@ -501,33 +647,62 @@ const addLink = () => {
 
 // 修改结点属性
 const editNode = () => {
-  nodeToEdit.value.name = editNodeName.value;
-  nodeToEdit.value.age = editNodeAge.value;
+  const node = nodeToEdit.value;
+  node.name = editNodeName.value;
+  node.age = editNodeAge.value;
+  // 生成CQL语句
+  const cql = `MATCH (n:Node {id: ${node.id},gid:${cur_graph_id.value}}) SET n.name = '${node.name}', n.age = ${node.age}`;
+  const cqlList = [cql];
+  // 你可以在这里发送CQL语句到服务器
+  runCQL(cqlList);
   hideEditNodeDialog();
   updateGraph();
 };
 
 // 修改关系属性
 const editLink = () => {
-  linkToEdit.value.name = editLinkName.value;
-  linkToEdit.value.weight = editLinkWeight.value;
+  const link = linkToEdit.value;
+  const oldName = link.name;
+  const oldWeight = link.weight;
+  link.name = editLinkName.value;
+  link.weight = editLinkWeight.value;
+
+  // 生成CQL语句
+  const cql = `MATCH   (a:Node {id: ${link.source.id},gid:${cur_graph_id.value}})-[r:RELATION {name: '${oldName}', weight: ${oldWeight}}]->(b:Node {id: ${link.target.id},gid:${cur_graph_id.value}}) SET r.name = '${link.name}', r.weight = ${link.weight}`;
+
+  const cqlList = [cql];
+  // 你可以在这里发送CQL语句到服务器
+  runCQL(cqlList);
+
   hideEditLinkDialog();
   updateGraph();
 };
 
 // 删除结点
 const deleteNode = () => {
-  nodes.value = nodes.value.filter((n) => n !== nodeToDelete.value);
-  links.value = links.value.filter(
-    (l) => l.source !== nodeToDelete.value && l.target !== nodeToDelete.value
-  );
+  const node = nodeToDelete.value;
+  nodes.value = nodes.value.filter((n) => n !== node);
+  links.value = links.value.filter((l) => l.source !== node && l.target !== node);
+  // 生成CQL语句
+  const cql = `MATCH   (n:Node {id: ${node.id},gid:${cur_graph_id.value}}) DETACH DELETE n`;
+  const cqlList = [cql];
+  // 你可以在这里发送CQL语句到服务器
+  runCQL(cqlList);
+
   hideDeleteNodeDialog();
   updateGraph();
 };
 
 // 删除关系
 const deleteLink = () => {
-  links.value = links.value.filter((l) => l !== linkToDelete.value);
+  const link = linkToDelete.value;
+  links.value = links.value.filter((l) => l !== link);
+  // 生成CQL语句
+  const cql = `MATCH   (a:Node {id: ${link.source.id},gid:${cur_graph_id.value}})-[r:RELATION {name: '${link.name}', weight: ${link.weight}}]->(b:Node {id: ${link.target.id},gid:${cur_graph_id.value}}) DELETE r`;
+  // 生成CQL语句
+  const cqlList = [cql];
+  // 你可以在这里发送CQL语句到服务器
+  runCQL(cqlList);
   hideDeleteLinkDialog();
   updateGraph();
 };
@@ -698,9 +873,15 @@ const drag = (simulation) => {
 
   return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
 };
-
+import { getAllSubGraphsService } from "@/api/graph.js";
+const getAllSubGraphs = async () => {
+  let result = await getAllSubGraphsService();
+  subGraphList.value = result.data;
+  console.log(result.data);
+};
 // 组件挂载时更新图表
 onMounted(() => {
+  getAllSubGraphs();
   updateGraph();
 });
 </script>

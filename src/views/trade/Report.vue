@@ -150,7 +150,7 @@
             >
               <div
                 :style="{
-                  width: progress + '%',
+                  width: progress[i] + '%',
                   height: '100%',
                   background: getRandomLightColor(),
                   borderRadius: '10px 0 0 10px',
@@ -158,7 +158,7 @@
                 }"
                 style="text-align: right"
               >
-                {{ progress + "%" }}
+                {{ progress[i] + "%" }}
               </div>
             </div>
           </div>
@@ -185,61 +185,8 @@
           "
         >
           <h2 style="text-align: center; font-family: '阿里妈妈数黑体'">分析报告</h2>
-          <section style="margin-bottom: 20px">
-            <h3>概述</h3>
-            <p>
-              本报告旨在全面分析近期交易数据，监控市场动态并识别潜在风险。通过数据采集与统计，为决策者提供直观、详实的分析信息，确保市场的稳定性和安全性。
-            </p>
-          </section>
-          <section style="margin-bottom: 20px">
-            <h3>报告小结</h3>
-            <table
-              style="
-                width: 100%;
-                border-collapse: collapse;
-                background: #ffffff;
-                color: black;
-              "
-            >
-              <thead>
-                <tr>
-                  <th style="border: 1px solid #ddd; padding: 8px">指标</th>
-                  <th style="border: 1px solid #ddd; padding: 8px">数值</th>
-                  <th style="border: 1px solid #ddd; padding: 8px">说明</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px">交易总量</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">1,250,000</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">
-                    近期整体交易活跃情况
-                  </td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px">异常检测</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">24</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">
-                    检测到的异常交易行为数量
-                  </td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px">风险等级</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">中等</td>
-                  <td style="border: 1px solid #ddd; padding: 8px">风险评估结果</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
-          <section>
-            <h3>异常行为分析</h3>
-            <p>
-              数据显示，过去一周内共检测到24起异常行为，其中多数涉及价格异常波动和交易量骤变。建议对以下方面进行重点监控：<br />
-              • 异常节点的实时数据采集<br />
-              • 与市场其他数据指标的联动分析<br />
-              • 及时预警和风险控制措施的落实
-            </p>
-          </section>
+
+          <div v-html="reportContent.reportText"></div>
         </div>
       </div>
     </div>
@@ -255,14 +202,31 @@ const tooltip = ref(null);
 const nodes = ref([]);
 const links = ref([]);
 const simulation = ref(null);
-import { getGraphService } from "@/api/report.js";
+const progress = [0, 0, 0, 0];
+const reportContent = ref({
+  graphid: 0,
+  id: 0,
+  itema: 0,
+  itemb: 0,
+  itemc: 0,
+  reportText: "",
+  reportid: 0,
+});
+import { getGraphService, getReportContentService } from "@/api/report.js";
 import { getEdges, getNodes } from "@/api/graph.js";
-const fetchData = async () => {
+import { useRoute } from "vue-router";
+const fetchData = async (reportId) => {
   try {
+    let result = await getReportContentService(reportId);
+    reportContent.value = result.data;
+    let graphId = reportContent.value.graphid;
+    progress[1] = reportContent.value.itema;
+    progress[2] = reportContent.value.itemb;
+    progress[3] = reportContent.value.itemc;
     nodes.value = [];
     links.value = [];
-    let result1 = await getEdges(1);
-    let result2 = await getNodes(1);
+    let result1 = await getEdges(graphId, "report");
+    let result2 = await getNodes(graphId, "report");
     const savedNodes = result2.data;
     const savedLinks = result1.data;
 
@@ -465,12 +429,16 @@ const getRandomLightColor = () => {
   }
   return color;
 };
-const progress = ref(50);
+
+import { useReportIdStore } from "@/stores/report";
+const reportStore = useReportIdStore();
 onMounted(() => {
   // Hide tooltip on mouse leave
   d3.select(tooltip.value).style("opacity", 0);
   d3.select(svg.value).on("mouseleave", hideTooltip); // Hide tooltip on mouse leave
-  fetchData();
+  const reportId = reportStore.id;
+  console.log(reportId);
+  fetchData(reportId);
 });
 </script>
 

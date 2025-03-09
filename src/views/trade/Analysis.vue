@@ -11,10 +11,12 @@
           <el-input
             placeholder="请输入报告名称"
             style="width: 300px; font-family: '华文中宋'; font-size: 16px"
+            v-model="searchContext"
           ></el-input>
           <el-button
             type="primary"
             style="font-family: '华文中宋'; font-size: 16px; margin-left: 20px"
+            @click="searchReport()"
           >
             查询
           </el-button>
@@ -60,7 +62,7 @@
                 link
                 type="primary"
                 size="small"
-                @click="router.push('/trade/report')"
+                @click="watchReport(scope.row.id)"
                 style="font-size: 14px; font-family: '华文中宋'"
               >
                 在线查看
@@ -79,22 +81,35 @@ import dayjs from "dayjs";
 import { useRouter } from "vue-router";
 import { getAllReportsService } from "@/api/report";
 import { onMounted } from "vue";
+import { watch } from "vue";
 const now = new Date();
 const router = useRouter();
-
+import { useReportIdStore } from "@/stores/report";
 const tableData = ref([]);
-
+const originTableData = ref([]);
+const searchContext = ref("");
+const reportStore = useReportIdStore();
+const searchReport = async () => {
+  tableData.value = originTableData.value.filter((item) => {
+    return item.reportname.includes(searchContext.value);
+  });
+};
 const deleteRow = (index: number) => {
   tableData.value.splice(index, 1);
 };
 const getAllReports = async () => {
   let result = await getAllReportsService();
   tableData.value = result.data;
+  originTableData.value = result.data;
   console.log(tableData.value);
 };
 const downloadReport = (reportUrl) => {
   console.log(reportUrl);
   window.open(reportUrl);
+};
+const watchReport = (id) => {
+  reportStore.setId(id);
+  router.push(`/trade/report`);
 };
 onMounted(() => {
   getAllReports();

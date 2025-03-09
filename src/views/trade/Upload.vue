@@ -186,9 +186,10 @@
                     font-size: 16px;
                     margin-top: 10px;
                     line-height: 25px;
+                    font-weight: bold;
                   "
                 >
-                  VF2算法是一种用于图形同构检测的高效算法，能够快速判断两个图是否同构<br />广泛应用于网络分析、生物信息学等领域。
+                  {{ introduce[currentItem] }}
                 </div>
               </div>
             </div>
@@ -370,7 +371,13 @@ import { computed, ref } from "vue";
 import { uploadService } from "@/api/user";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
-
+const introduce = ref({
+  GNN:
+    "GNN算法是一种基于图神经网络的图匹配算法，通过学习图的特征向量，实现图的同构检测。",
+  Ullmann:
+    "Ullmann算法是一种基于图的同构检测算法，通过递归的方式，对图的节点进行匹配，判断两个图是否同构。",
+  VF2: "VF2算法是一种高效的图匹配算法，通过对图的节点进行递归匹配，判断两个图是否同构。",
+});
 const fileInput = ref(null); // 创建一个引用来访问文件输入元素
 const fileName = ref("");
 const fileSize = ref("");

@@ -12,10 +12,12 @@
         <el-input
           placeholder="请输入图标题名称"
           style="width: 300px; font-family: '华文中宋'; font-size: 16px"
+          v-model="searchContext"
         ></el-input>
         <el-button
           type="primary"
           style="font-family: '华文中宋'; font-size: 16px; margin-left: 20px"
+          @click="searchGraph()"
         >
           查询
         </el-button>
@@ -88,7 +90,7 @@
                   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
                 "
               >
-                风险等级 ：{{ "⭐".repeat(subGraph.level) }}
+                风险等级 ：{{ subGraph.level ? "⭐".repeat(subGraph.level) : "未设定" }}
               </div>
             </div>
           </div>
@@ -311,11 +313,11 @@
                 style="font-size: 16px"
                 v-model="graphInfo.level"
               >
-                <el-option label="一星级" value="1"></el-option>
-                <el-option label="二星级" value="2"></el-option>
-                <el-option label="三星级" value="3"></el-option>
-                <el-option label="四星级" value="4"></el-option>
-                <el-option label="五星级" value="5"></el-option>
+                <el-option label="一星级" value="1">一星级</el-option>
+                <el-option label="二星级" value="2">二星级</el-option>
+                <el-option label="三星级" value="3">三星级</el-option>
+                <el-option label="四星级" value="4">四星级</el-option>
+                <el-option label="五星级" value="5">五星级</el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="描述">
@@ -398,6 +400,7 @@ const linkContextMenuX = ref(0);
 const linkContextMenuY = ref(0);
 const subGraphList = ref([]);
 const cur_state = ref(0); //0表示新增，1表示修改
+const searchContext = ref("");
 const graphInfo = ref({
   title: "",
   level: "",
@@ -428,6 +431,11 @@ const generatePreview = async () => {
     };
     image.src = url;
   });
+};
+const searchGraph = async () => {
+  subGraphList.value = orignalSubGraphList.value.filter((subGraph) =>
+    subGraph.title.includes(searchContext.value)
+  );
 };
 const saveParams = async () => {
   await generatePreview();
@@ -473,8 +481,8 @@ import { getEdges, getNodes } from "@/api/graph.js";
 const getEdgesAndNodes = async () => {
   nodes.value = [];
   links.value = [];
-  let result1 = await getEdges(cur_graph_id.value);
-  let result2 = await getNodes(cur_graph_id.value);
+  let result1 = await getEdges(cur_graph_id.value, "sub");
+  let result2 = await getNodes(cur_graph_id.value, "sub");
   const savedNodes = result2.data;
   const savedLinks = result1.data;
 
@@ -614,7 +622,7 @@ const addNode = () => {
   // 生成CQL语句
   const cql1 = `CREATE (n:Node {id: ${newNode.id} ,gid:${cur_graph_id.value} ,name: '${newNode.name}', age: ${newNode.age}, color: '${newNode.color}'})`;
   console.log(cur_graph_id.value);
-  const cql2 = ` MATCH (g:Graph {graph_id: ${cur_graph_id.value}}), (n:Node {id: ${newNode.id},gid:${cur_graph_id.value}}) CREATE (g)-[:CONTAINS]->(n)`;
+  const cql2 = ` MATCH (g:Graph {graph_id: ${cur_graph_id.value},graph_type:"sub"}), (n:Node {id: ${newNode.id},gid:${cur_graph_id.value}}) CREATE (g)-[:CONTAINS]->(n)`;
   const cqlList = [cql1, cql2];
   runCQL(cqlList);
   hideAddNodeDialog();
@@ -874,9 +882,11 @@ const drag = (simulation) => {
   return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
 };
 import { getAllSubGraphsService } from "@/api/graph.js";
+const orignalSubGraphList = ref([]);
 const getAllSubGraphs = async () => {
   let result = await getAllSubGraphsService();
   subGraphList.value = result.data;
+  orignalSubGraphList.value = result.data;
   console.log(result.data);
 };
 // 组件挂载时更新图表

@@ -23,11 +23,7 @@
       </el-popover>
     </div>
   </div>
-  <el-dialog
-    v-model="selfDialogVisible"
-    title="个人信息"
-    style="width: 400px; height: 300px"
-  >
+  <el-dialog v-model="selfDialogVisible" title="个人信息" width="400px">
     <el-form label-width="100px">
       <el-form-item label="姓名" prop="name">
         <el-input v-model="form.name" placeholder="请输入您的姓名"></el-input>
@@ -37,15 +33,14 @@
         <el-input v-model="form.tel" placeholder="请输入您的联系方式"></el-input>
       </el-form-item>
 
-      <el-form-item>
+      <el-form-item style="margin-left: 200px">
         <el-button type="primary" @click="updateUserInfo">提交</el-button>
-        <el-button style="margin-left: 10px" @click="resetForm">重置</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
-  <el-dialog v-model="logoutVisible" title="确认退出">
-    <div>退出登陆？</div>
-    <span slot="footer" class="dialog-footer">
+  <el-dialog v-model="logoutVisible" title="确认退出" width="300px">
+    <div style="text-align: center; margin-bottom: 20px">确定要退出登录吗？</div>
+    <span slot="footer" class="dialog-footer" style="margin-left: 70px">
       <el-button @click="logoutVisible = false">取消</el-button>
       <el-button type="primary" @click="handleLogout">确定</el-button>
     </span>
@@ -76,10 +71,7 @@ const handleLogout = () => {
   router.push("/login");
   ElMessage.success("退出成功");
 };
-const resetForm = () => {
-  form.value.name = "";
-  form.value.contact = "";
-};
+
 const updateUserInfo = async () => {
   let result = await updateUserInfoService(form.value);
   ElMessage.success("更新成功");

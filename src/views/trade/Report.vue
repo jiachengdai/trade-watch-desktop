@@ -58,7 +58,7 @@
             <el-button type="primary" @click="resetFilter">全部节点</el-button>
             <div style="margin-top: 10px; max-height: 100px; overflow-y: auto">
               <el-button
-                v-for="(node, index) in nodes"
+                v-for="(node, index) in originalNodes"
                 :key="node.name"
                 :style="{
                   backgroundColor: `hsl(${(index * 137.508) % 360}, 70%, 90%)`,
@@ -77,7 +77,7 @@
             <el-button type="primary" @click="resetFilter">全部关系</el-button>
             <div style="margin-top: 10px; max-height: 100px; overflow-y: auto">
               <el-button
-                v-for="(link, index) in links"
+                v-for="(link, index) in originalLinks"
                 :key="index"
                 style="margin: 5px; color: white; background-color: rgb(165, 171, 182)"
                 @click="filterGraphByLink(link)"
@@ -201,6 +201,8 @@ const svg = ref(null);
 const tooltip = ref(null);
 const nodes = ref([]);
 const links = ref([]);
+const originalNodes = ref([]);
+const originalLinks = ref([]);
 const simulation = ref(null);
 const progress = [0, 0, 0, 0];
 const reportContent = ref({
@@ -215,6 +217,42 @@ const reportContent = ref({
 import { getGraphService, getReportContentService } from "@/api/report.js";
 import { getEdges, getNodes } from "@/api/graph.js";
 import { useRoute } from "vue-router";
+const filterGraphByNode = (node) => {
+  const filteredNodes = new Set();
+  const filteredLinks = [];
+  filteredNodes.add(node);
+  originalLinks.value.forEach((link) => {
+    if (link.source.name == node.name || link.target.name == node.name) {
+      filteredNodes.add(link.source);
+      filteredNodes.add(link.target);
+      filteredLinks.push(link);
+    }
+  });
+  nodes.value = Array.from(filteredNodes);
+  links.value = filteredLinks;
+  drawGraph();
+};
+const filterGraphByLink = (filterlink) => {
+  const filteredNodes = new Set();
+  const filteredLinks = [];
+  filteredLinks.push(filterlink);
+  originalLinks.value.forEach((link) => {
+    if (link.relationship == filterlink.relationship) {
+      filteredNodes.add(link.source);
+      filteredNodes.add(link.target);
+      filteredLinks.push(link);
+    }
+  });
+  nodes.value = Array.from(filteredNodes);
+  links.value = filteredLinks;
+  drawGraph();
+};
+const resetFilter = () => {
+  nodes.value = originalNodes.value;
+  links.value = originalLinks.value;
+  drawGraph();
+};
+
 const fetchData = async (reportId) => {
   try {
     let result = await getReportContentService(reportId);
@@ -234,13 +272,15 @@ const fetchData = async (reportId) => {
       nodes.value.push(savedNodes[i]);
     }
     for (let i = 0; i < savedLinks.length; i++) {
-      savedLinks[i].source = savedNodes.find((n) => n.id === savedLinks[i].source.id);
-      savedLinks[i].target = savedNodes.find((n) => n.id === savedLinks[i].target.id);
+      savedLinks[i].source = savedNodes.find((n) => n.id == savedLinks[i].source.id);
+      savedLinks[i].target = savedNodes.find((n) => n.id == savedLinks[i].target.id);
       savedLinks[i].id = savedLinks[i].relationshipId;
       savedLinks[i].relationship = savedLinks[i].relationshipName;
       savedLinks[i].weight = savedLinks[i].relationshipWeight;
       links.value.push(savedLinks[i]);
     }
+    originalNodes.value = nodes.value;
+    originalLinks.value = links.value;
     drawGraph();
   } catch (error) {
     console.error(error);

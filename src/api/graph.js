@@ -10,6 +10,15 @@ export const getNodes=(graphId,graphType)=>{
 export const getEdges=(graphId,graphType)=>{
   return request.get('/graph/relations?graphId='+graphId+"&graphType="+graphType);
 }
+
+
+export const getAllAvailableNodes=()=>{
+  return request.get('/graph/allAvailableNodes');
+}
+export const getAllAvailableEdges=()=>{
+  return request.get('/graph/allAvailableRelations');
+}
+
 export const saveSubGraphService=(graphInfo)=>{
   return request.post('/graph/saveSubGraph',graphInfo);
 }

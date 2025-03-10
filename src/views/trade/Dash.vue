@@ -44,10 +44,10 @@
               margin-top: 15px;
             "
           ></div>
-          <div class="people-item" v-for="i in 7">
+          <div class="people-item" v-for="people in dangerPeople">
             <div class="people-icon">
               <img
-                src="../../assets/avatar-boy.png"
+                :src="people.avatar"
                 width="100%"
                 height="100%"
                 style="border-radius: 40px"
@@ -55,12 +55,13 @@
             </div>
             <div class="people-info">
               <div class="people-name">
-                代佳诚{{ i }} <i v-if="i == 1" style="color: red">高危用户</i>
-                <i v-if="i == 2" style="color: yellow">中风险</i>
-                <i v-if="i == 3" style="color: #01ff46">低风险</i>
+                {{ people.name }}
+                <i v-if="people.risk > 3" style="color: red">高危用户</i>
+                <i v-if="people.risk == 3" style="color: yellow">中风险</i>
+                <i v-if="people.risk < 3" style="color: #01ff46">低风险</i>
               </div>
               <div class="people-risk">
-                <img src="../../assets/star.svg" class="stars" v-for="i in 5" />
+                <img src="../../assets/star.svg" class="stars" v-for="i in people.risk" />
               </div>
             </div>
           </div>
@@ -154,35 +155,65 @@
 </template>
 
 <script setup>
-import { onMounted, onUpdated } from "vue";
+import { onMounted, onUpdated, ref } from "vue";
 import * as echarts from "echarts";
-function generateDates(startDate, endDate) {
-  const dates = [];
-  let currentDate = new Date(startDate);
-  const end = new Date(endDate);
+const dangerPeople = ref([
+  {
+    name: "张三",
+    risk: 5,
+    avatar:
+      "https://tse4-mm.cn.bing.net/th/id/OIP-C.mWDV3GWFSdU9x6YY5DDtkgHaHa?rs=1&pid=ImgDetMain",
+  },
+  {
+    name: "李四",
+    risk: 5,
+    avatar:
+      "https://bpic.588ku.com/element_origin_min_pic/23/07/24/6c665a17d8762855c62a40e783674fdc.jpg",
+  },
+  {
+    name: "王五",
+    risk: 3,
+    avatar:
+      "https://tse4-mm.cn.bing.net/th/id/OIP-C.aXQausdoU8N5E_LmIENNxwHaHz?w=188&h=198&c=7&r=0&o=5&dpr=2&pid=1.7",
+  },
+  {
+    name: "赵六",
+    risk: 3,
+    avatar:
+      "https://tse3-mm.cn.bing.net/th/id/OIP-C.pHjUvjMDkDsqBT3WVsxM0wHaHa?w=196&h=196&c=7&r=0&o=5&dpr=2&pid=1.7",
+  },
+  {
+    name: "林七",
+    risk: 3,
+    avatar:
+      "https://tse2-mm.cn.bing.net/th/id/OIP-C.75_mtsm-4NC83U0_nVdzUgAAAA?w=184&h=184&c=7&r=0&o=5&dpr=2&pid=1.7",
+  },
+  {
+    name: "董八",
+    risk: 2,
+    avatar:
+      "https://tse4-mm.cn.bing.net/th/id/OIP-C.YYWUtU2rvvrUkljk-1d8jQHaHa?w=215&h=217&c=7&r=0&o=5&dpr=2&pid=1.7",
+  },
+  {
+    name: "高九",
+    risk: 1,
+    avatar:
+      "https://tse1-mm.cn.bing.net/th/id/OIP-C.WRNRnEF7Wsghsa-bcNFt5wHaI8?w=168&h=203&c=7&r=0&o=5&dpr=2&pid=1.7",
+  },
+]);
 
-  while (currentDate <= end) {
-    dates.push(currentDate.toISOString().split("T")[0]);
-    currentDate.setDate(currentDate.getDate() + 1);
+import { getEveryDayTradeService } from "@/api/data.js";
+const dates = ref([]);
+const data = ref([]);
+const getEveryDayTrade = async () => {
+  let result = await getEveryDayTradeService();
+  for (let i = 0; i < result.data.length; i++) {
+    dates.value.push(result.data[i].tradedate);
+    data.value.push(result.data[i].tradeTotal);
   }
-
-  return dates;
-}
-
-// 生成随机数据
-function generateData(length, min, max) {
-  const data = [];
-  for (let i = 0; i < length; i++) {
-    data.push(Math.floor(Math.random() * (max - min + 1)) + min);
-  }
-  return data;
-}
-
-onMounted(() => {
-  const startDate = "2025-01-02";
-  const endDate = new Date().toISOString().split("T")[0];
-  const dates = generateDates(startDate, endDate);
-  const data = generateData(dates.length, 100, 500);
+};
+onMounted(async () => {
+  await getEveryDayTrade();
 
   var chartDom = document.getElementById("lineChart");
   var myChart = echarts.init(chartDom);
@@ -202,7 +233,7 @@ onMounted(() => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: dates,
+      data: dates.value,
     },
     yAxis: {
       type: "value",
@@ -213,7 +244,7 @@ onMounted(() => {
         type: "line",
         smooth: true,
         areaStyle: {},
-        data: data,
+        data: data.value,
         itemStyle: {
           color: "rgba(67, 145, 244, 1)",
         },
@@ -229,11 +260,21 @@ onMounted(() => {
 
   option && myChart.setOption(option);
 });
-onMounted(() => {
+const tradeTypeList = ref([]);
+import { getTypeStaticService } from "@/api/data.js";
+const getTradeTypeList = async () => {
+  let result = await getTypeStaticService();
+  tradeTypeList.value = result.data;
+  for (let i = 0; i < tradeTypeList.value.length; i++) {
+    tradeTypeList.value[i].value = tradeTypeList.value[i].total;
+  }
+};
+onMounted(async () => {
   var chartDom = document.getElementById("pieChart");
   var myChart = echarts.init(chartDom);
   var option;
-
+  await getTradeTypeList();
+  console.log(tradeTypeList.value);
   option = {
     tooltip: {
       trigger: "item",
@@ -243,12 +284,7 @@ onMounted(() => {
         name: "占比",
         type: "pie",
         radius: "90%",
-        data: [
-          { value: 30, name: "洗钱" },
-          { value: 20, name: "庞氏骗局" },
-          { value: 10, name: "诈骗" },
-          { value: 40, name: "其他" },
-        ],
+        data: tradeTypeList.value,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -282,36 +318,52 @@ const colorList = [
   "rgba(105, 214, 253, 1)",
   "rgba(54, 198, 160, 1)",
 ];
-
+import { getAllAvailableNodes, getAllAvailableEdges } from "@/api/graph.js";
 // 生成随机颜色
 function getRandomColor() {
   return colorList[Math.floor(Math.random() * colorList.length)];
 }
-onMounted(() => {
+const nodes = ref([]);
+const links = ref([]);
+const savedNodes = ref([]);
+const savedLinks = ref([]);
+const getEdgesAndNodes = async () => {
+  let result1 = await getAllAvailableEdges();
+  let result2 = await getAllAvailableNodes();
+  savedNodes.value = result2.data;
+  savedLinks.value = result1.data;
+};
+onMounted(async () => {
   var chartDom = document.getElementById("networkChart");
   var myChart = echarts.init(chartDom);
   var option;
+  await getEdgesAndNodes();
 
-  const nodes = [];
-  const edges = [];
+  for (let i = 0; i < savedLinks.value.length; i++) {
+    savedLinks.value[i].source = savedNodes.value.find(
+      (n) => n.id === savedLinks.value[i].source.id
+    );
+    savedLinks.value[i].target = savedNodes.value.find(
+      (n) => n.id === savedLinks.value[i].target.id
+    );
+    savedLinks.value[i].id = savedLinks.value[i].relationshipId;
+    savedLinks.value[i].name = savedLinks.value[i].relationshipName;
+    savedLinks.value[i].weight = savedLinks.value[i].relationshipWeight;
 
-  // 生成20个节点
-  for (let i = 0; i < 20; i++) {
-    nodes.push({
-      id: i.toString(),
-      name: `节点${i}`,
+    links.value.push({
+      source: savedLinks.value[i].source.id.toString(),
+      target: savedLinks.value[i].target.id.toString(),
+    });
+  }
+
+  for (let i = 0; i < savedNodes.value.length; i++) {
+    nodes.value.push({
+      id: savedNodes.value[i].id.toString(),
+      name: savedNodes.value[i].name,
       symbolSize: 20,
       itemStyle: {
         color: getRandomColor(),
       },
-    });
-  }
-
-  // 生成随机边
-  for (let i = 0; i < 30; i++) {
-    edges.push({
-      source: Math.floor(Math.random() * 20).toString(),
-      target: Math.floor(Math.random() * 20).toString(),
     });
   }
 
@@ -321,8 +373,8 @@ onMounted(() => {
       {
         type: "graph",
         layout: "force",
-        data: nodes,
-        links: edges,
+        data: nodes.value,
+        links: links.value,
         roam: true,
         label: {
           show: true,

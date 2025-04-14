@@ -4,13 +4,18 @@ return  request.post("/graph/runCQL", {
      
     cqls: cqls,}
   )}
-export const getNodes=(graphId,graphType)=>{
-  return request.get('/graph/nodes?graphId='+graphId+"&graphType="+graphType);
+export const getAccountNodes=(reportId)=>{
+  return request.get('/graph/getAccountNodes?reportId='+reportId);
 }
-export const getEdges=(graphId,graphType)=>{
-  return request.get('/graph/relations?graphId='+graphId+"&graphType="+graphType);
+export const getTransactionNodes=(reportId)=>{
+  return request.get('/graph/getTransactionNodes?reportId='+reportId);
 }
-
+export const getSubEdges=(graphId,graphType)=>{
+  return request.get('/graph/getSubEdges?graphId='+graphId+"&graphType="+graphType);
+}
+export const getSubNodes=(graphId,graphType)=>{
+  return request.get('/graph/getSubNodes?graphId='+graphId+"&graphType="+graphType);
+}
 
 export const getAllAvailableNodes=()=>{
   return request.get('/graph/allAvailableNodes');
@@ -34,4 +39,9 @@ export const getAllSubGraphsService=()=>{
 export const updateSubGraphService=(graphInfo,graphId)=>{
   return request.post('/graph/updateSubGraph?gid='+graphId,graphInfo);
 }
- 
+export const getTradeTypeNode=(gid,tradeType,graphType)=>{
+return request.get('/graph/getTradeTypeNode?gid='+gid+'&tradeType='+tradeType+'&graphType='+graphType);
+}
+export const getTradeTypeEdge=(gid,tradeType,graphType)=>{
+  return request.get('/graph/getTradeTypeLinks?gid='+gid+'&tradeType='+tradeType+'&graphType='+graphType);
+}

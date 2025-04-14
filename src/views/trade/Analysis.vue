@@ -28,7 +28,7 @@
           style="width: 100%; font-family: '华文中宋'; font-size: 16px"
           max-height="680"
         >
-          <el-table-column fixed prop="reportname" label="报告名称" width="380">
+          <el-table-column fixed prop="reportname" label="报告名称" width="240">
             <template #default="scope">
               <span>
                 {{
@@ -40,7 +40,9 @@
             </template>
           </el-table-column>
           <el-table-column prop="updatetime" label="检测日期" width="220" />
-          <el-table-column prop="dangernum" label="风险数" width="220" />
+          <el-table-column prop="algorithm" label="检测算法" width="220" />
+
+          <el-table-column prop="dangernum" label="风险数" width="150" />
           <el-table-column prop="grade" label="风险等级" width="150">
             <template #default="scope">
               <span v-for="n in scope.row.grade" :key="n">⭐</span>
@@ -103,9 +105,8 @@ const getAllReports = async () => {
   originTableData.value = result.data;
   console.log(tableData.value);
 };
-const downloadReport = (reportUrl) => {
-  console.log(reportUrl);
-  window.open(reportUrl);
+const downloadReport = (reportUrl) => { 
+  window.open(reportUrl,"_parent");
 };
 const watchReport = (id) => {
   reportStore.setId(id);

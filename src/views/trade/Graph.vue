@@ -477,12 +477,12 @@ const newSubGraphDialog = async () => {
   cur_graph_id.value = result.data;
   console.log(cur_graph_id.value);
 };
-import { getEdges, getNodes } from "@/api/graph.js";
+import { getSubEdges, getSubNodes } from "@/api/graph.js";
 const getEdgesAndNodes = async () => {
   nodes.value = [];
   links.value = [];
-  let result1 = await getEdges(cur_graph_id.value, "sub");
-  let result2 = await getNodes(cur_graph_id.value, "sub");
+  let result1 = await getSubEdges(cur_graph_id.value, "sub");
+  let result2 = await getSubNodes(cur_graph_id.value, "sub");
   const savedNodes = result2.data;
   const savedLinks = result1.data;
 

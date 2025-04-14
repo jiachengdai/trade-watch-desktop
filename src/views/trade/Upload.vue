@@ -1,6 +1,10 @@
 <template>
   <div class="homePageBody" style="overflow-y: auto">
     &nbsp;
+    <div v-if="isUploading" class="uploading-overlay">
+      文件正在上传，请稍候……
+    
+    </div>
     <div class="innerContainer">
       &nbsp;
       <div name="page1" v-show="currentPage == 1">
@@ -24,6 +28,9 @@
             <button class="personality-button" @click="triggerFileInput">
               点击此处上传数据文件
             </button>
+            <div class="download" @click="downloadTemplate()">
+              点击此处下载数据交易模版文件
+            </div>
             <input
               type="file"
               ref="fileInput"
@@ -303,7 +310,7 @@
                         :true-value="'是'"
                         :false-value="'否'"
                       />
-                      允许数据记录
+                      允许系统进行数据记录 
                     </label>
                   </div>
                 </div>
@@ -313,7 +320,7 @@
                   <form class="form">
                     <div style="font-size: 16px; margin-left: 5px">
                       <label style="margin-right: 20px" v-if="currentItem != 'Ullmann'">
-                        <input type="radio" value="UL" v-model="selectedAlgorithm" />
+                        <input type="radio" value="Ullmann" v-model="selectedAlgorithm" />
                         Ullmann
                       </label>
                       <label style="margin-right: 20px" v-if="currentItem != 'GNN'">
@@ -384,6 +391,8 @@ const fileSize = ref("");
 const fileUrl = ref("");
 const router = useRouter();
 const currentPage = ref(1);
+const isUploading = ref(false); // 添加状态变量
+
 // 函数：模拟点击文件输入
 const triggerFileInput = () => {
   fileInput.value.click();
@@ -401,25 +410,34 @@ const uploadFile = async (event) => {
     console.log("选择的文件:", file.name);
     fileName.value = file.name;
     fileSize.value = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-    // 这里可以进行实际的上传操作，例如使用 Fetch API 或 Axios
-    const formData = new FormData();
-    formData.append("file", file);
-    let result = await uploadService(formData);
-    console.log(result.data);
-    addFile(file.name, result.data);
-    fileUrl.value = result.data;
-    const container = document.querySelector(".innerContainer");
-    if (container) {
-      container.style.transition = "opacity 0.5s ease";
-      container.style.opacity = 0;
-      setTimeout(() => {
+    isUploading.value = true;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      let result = await uploadService(formData);
+      console.log(result.data);
+      addFile(file.name, result.data);
+      fileUrl.value = result.data;
+
+      const container = document.querySelector(".innerContainer");
+      if (container) {
+        container.style.transition = "opacity 0.5s ease";
+        container.style.opacity = 0;
+        setTimeout(() => {
+          currentPage.value = 2;
+          container.style.opacity = 1;
+        }, 500);
+      } else {
         currentPage.value = 2;
-        container.style.opacity = 1;
-      }, 500);
-    } else {
-      currentPage.value = 2;
+      }
+    } catch (error) {
+      console.error("文件上传失败:", error);
+      ElMessage.error("文件上传失败，请重试！");
+    } finally {
+      // 隐藏上传状态
+      isUploading.value = false;
     }
-    // 使用 Fetch API 上传文件
   } else {
     console.log("没有选择文件");
   }
@@ -435,7 +453,7 @@ const numbers = ref([
   "VF2",
   "Ullmann",
   "GNN",
-  "VF2",
+  "Ullmann",
 ]);
 const rotationAngle = ref(0);
 const isRotating = ref(false);
@@ -491,16 +509,21 @@ const selectedAlgorithm = ref("无");
 const allowDataRecord = ref("否");
 const submmit = async () => {
   submmitDialogVisible.value = false;
-  ElMessage.success("提交成功");
+
+  ElMessage.success("提交成功,5分钟后可查询分析结果");
 
   currentPage.value = 1;
   router.push("/trade/analysis");
-  let result = await newApplyService(
+   let result = await newApplyService(
     file,
     currentItem.value,
     selectedAlgorithm.value,
     allowDataRecord.value
   );
+};
+const downloadTemplate = () => {
+  window.open('https://big-event0713.oss-cn-shanghai.aliyuncs.com/template.csv',"_parent");
+   
 };
 </script>
 
@@ -947,5 +970,25 @@ const submmit = async () => {
 }
 .checkout-btn:active {
   transform: scale(0.95);
+}
+.download{
+  color: rgb(33, 150, 243);
+}
+.download:hover{
+  cursor: pointer;
+}
+.uploading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 </style>

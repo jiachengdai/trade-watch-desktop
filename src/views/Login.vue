@@ -22,7 +22,7 @@
         TradeWatch
       </div>
       <div class="container" v-if="loginVisible == true">
-        <div class="heading">登陆🥳</div>
+        <div class="heading">登录🥳</div>
         <el-form class="form">
           <input
             v-model="LoginUserInfoForm.username"
@@ -46,7 +46,7 @@
             ><a @click="loginVisible = false">没有账号？立即注册！</a></span
           >
         </el-form>
-        <button class="login-button" @click="login">登陆</button>
+        <button class="login-button" @click="login">登录</button>
       </div>
       <div class="container" v-if="loginVisible == false">
         <div class="heading">注册🥳</div>
@@ -71,7 +71,7 @@
 
           <p class="tip">{{ loginPasswordTip }}</p>
           <span class="forgot-password"
-            ><a @click="loginVisible = true">已有账号？点此登陆</a></span
+            ><a @click="loginVisible = true">已有账号？点此登录</a></span
           >
         </el-form>
         <button class="login-button" @click="register()">注册</button>

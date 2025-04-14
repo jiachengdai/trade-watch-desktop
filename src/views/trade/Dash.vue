@@ -16,11 +16,41 @@
       交易行为数据可视化
     </div>
     <div id="top-nums" style="display: flex; margin-left: 50px; margin-top: 20px">
-      <div class="top-num-box" v-for="i in 5">
+      <div class="top-num-box" >
         <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
         <div class="top-num-text">
-          <div class="top-num-num">39291</div>
-          <div class="top-num-label">新增数据</div>
+          <div class="top-num-num">9290</div>
+          <div class="top-num-label">累计交易用户</div>
+        </div>
+      </div>
+      <div class="top-num-box" >
+        <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
+        <div class="top-num-text">
+          <div class="top-num-num">19291</div>
+          <div class="top-num-label">累计交易量</div>
+        </div>
+      </div>
+      <div class="top-num-box" >
+        <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
+        <div class="top-num-text">
+          <div class="top-num-num">800</div>
+          <div class="top-num-label">累计风险用户</div>
+        </div>
+      </div>
+      <div class="top-num-box" >
+        <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
+        <div class="top-num-text">
+          <div class="top-num-num">1600</div>
+          <div class="top-num-label">累计风险交易量</div>
+        </div>
+      </div>
+      <div class="top-num-box" >
+        <div class="top-num-icon"><img src="../../assets/数据.svg" /></div>
+        <div class="top-num-text">
+            <div class="top-num-num">
+            {{ Math.floor((new Date() - new Date("2025-02-20")) / (1000 * 60 * 60 * 24)) }}
+            </div>
+          <div class="top-num-label">系统已运行（天）</div>
         </div>
       </div>
     </div>
@@ -70,7 +100,7 @@
       <div class="boxes" style="width: 650px; height: 500px">
         <div style="width: 650px; height: 100px">
           <div style="width: 650px; height: 40px; margin-top: 10px; display: flex">
-            <div style="position: relative" v-for="i in 3">
+            <div style="position: relative"  >
               <img src="../../assets/png.png" width="100%" height="100%" />
               <div
                 style="
@@ -87,10 +117,56 @@
                   font-weight: bolder;
                 "
               >
-                XXX数据
+                风险用户较昨日
               </div>
               <div style="font-size: 26px; color: red; text-align: center">
                 <i style="color: white; font-weight: bolder">39%</i> ↑
+              </div>
+            </div>
+            <div style="position: relative"  >
+              <img src="../../assets/png.png" width="100%" height="100%" />
+              <div
+                style="
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 98%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  color: white;
+                  font-size: 14px;
+                  font-weight: bolder;
+                "
+              >
+                风险行为较昨日
+              </div>
+              <div style="font-size: 26px; color: red; text-align: center">
+                <i style="color: white; font-weight: bolder">39%</i> ↑
+              </div>
+            </div>
+            <div style="position: relative"  >
+              <img src="../../assets/png.png" width="100%" height="100%" />
+              <div
+                style="
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 98%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  color: white;
+                  font-size: 14px;
+                  font-weight: bolder;
+                "
+              >
+                模式图新增
+              </div>
+              <div style="font-size: 26px; color: red; text-align: center">
+                <i style="color: white; font-weight: bolder">2</i> ↑
               </div>
             </div>
           </div>
@@ -159,43 +235,43 @@ import { onMounted, onUpdated, ref } from "vue";
 import * as echarts from "echarts";
 const dangerPeople = ref([
   {
-    name: "张三",
+    name: "U01",
     risk: 5,
     avatar:
       "https://tse4-mm.cn.bing.net/th/id/OIP-C.mWDV3GWFSdU9x6YY5DDtkgHaHa?rs=1&pid=ImgDetMain",
   },
   {
-    name: "李四",
+    name: "U02",
     risk: 5,
     avatar:
       "https://bpic.588ku.com/element_origin_min_pic/23/07/24/6c665a17d8762855c62a40e783674fdc.jpg",
   },
   {
-    name: "王五",
+    name: "U03",
     risk: 3,
     avatar:
       "https://tse4-mm.cn.bing.net/th/id/OIP-C.aXQausdoU8N5E_LmIENNxwHaHz?w=188&h=198&c=7&r=0&o=5&dpr=2&pid=1.7",
   },
   {
-    name: "赵六",
+    name: "U04",
     risk: 3,
     avatar:
       "https://tse3-mm.cn.bing.net/th/id/OIP-C.pHjUvjMDkDsqBT3WVsxM0wHaHa?w=196&h=196&c=7&r=0&o=5&dpr=2&pid=1.7",
   },
   {
-    name: "林七",
+    name: "U05",
     risk: 3,
     avatar:
       "https://tse2-mm.cn.bing.net/th/id/OIP-C.75_mtsm-4NC83U0_nVdzUgAAAA?w=184&h=184&c=7&r=0&o=5&dpr=2&pid=1.7",
   },
   {
-    name: "董八",
+    name: "U06",
     risk: 2,
     avatar:
       "https://tse4-mm.cn.bing.net/th/id/OIP-C.YYWUtU2rvvrUkljk-1d8jQHaHa?w=215&h=217&c=7&r=0&o=5&dpr=2&pid=1.7",
   },
   {
-    name: "高九",
+    name: "U07",
     risk: 1,
     avatar:
       "https://tse1-mm.cn.bing.net/th/id/OIP-C.WRNRnEF7Wsghsa-bcNFt5wHaI8?w=168&h=203&c=7&r=0&o=5&dpr=2&pid=1.7",
@@ -240,7 +316,7 @@ onMounted(async () => {
     },
     series: [
       {
-        name: "数据",
+        name: "新增",
         type: "line",
         smooth: true,
         areaStyle: {},
@@ -273,8 +349,7 @@ onMounted(async () => {
   var chartDom = document.getElementById("pieChart");
   var myChart = echarts.init(chartDom);
   var option;
-  await getTradeTypeList();
-  console.log(tradeTypeList.value);
+  await getTradeTypeList(); 
   option = {
     tooltip: {
       trigger: "item",
@@ -318,7 +393,7 @@ const colorList = [
   "rgba(105, 214, 253, 1)",
   "rgba(54, 198, 160, 1)",
 ];
-import { getAllAvailableNodes, getAllAvailableEdges } from "@/api/graph.js";
+import {getAccountNodes , getTransactionNodes} from "@/api/graph.js"; 
 // 生成随机颜色
 function getRandomColor() {
   return colorList[Math.floor(Math.random() * colorList.length)];
@@ -328,10 +403,10 @@ const links = ref([]);
 const savedNodes = ref([]);
 const savedLinks = ref([]);
 const getEdgesAndNodes = async () => {
-  let result1 = await getAllAvailableEdges();
-  let result2 = await getAllAvailableNodes();
-  savedNodes.value = result2.data;
-  savedLinks.value = result1.data;
+  let resultAccountNodes = await getAccountNodes(1);
+  let resultTransactionNodes=await getTransactionNodes(1);
+  savedNodes.value = resultAccountNodes.data;
+  savedLinks.value = resultTransactionNodes.data;
 };
 onMounted(async () => {
   var chartDom = document.getElementById("networkChart");
@@ -339,17 +414,17 @@ onMounted(async () => {
   var option;
   await getEdgesAndNodes();
 
+
   for (let i = 0; i < savedLinks.value.length; i++) {
     savedLinks.value[i].source = savedNodes.value.find(
-      (n) => n.id === savedLinks.value[i].source.id
+      (n) => n.name === savedLinks.value[i].nameOrig
     );
     savedLinks.value[i].target = savedNodes.value.find(
-      (n) => n.id === savedLinks.value[i].target.id
+      (n) => n.name === savedLinks.value[i].nameDest
     );
     savedLinks.value[i].id = savedLinks.value[i].relationshipId;
-    savedLinks.value[i].name = savedLinks.value[i].relationshipName;
-    savedLinks.value[i].weight = savedLinks.value[i].relationshipWeight;
-
+    savedLinks.value[i].type = savedLinks.value[i].relationshipName;
+ 
     links.value.push({
       source: savedLinks.value[i].source.id.toString(),
       target: savedLinks.value[i].target.id.toString(),

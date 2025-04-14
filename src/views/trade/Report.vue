@@ -56,6 +56,8 @@
             "
           >
             <el-button type="primary" @click="resetFilter">全部节点</el-button>
+            <el-button type="primary" @click="filterFraudUser">一键查看风险用户</el-button>
+
             <div style="margin-top: 10px; max-height: 100px; overflow-y: auto">
               <el-button
                 v-for="(node, index) in originalNodes"
@@ -77,13 +79,13 @@
             <el-button type="primary" @click="resetFilter">全部关系</el-button>
             <div style="margin-top: 10px; max-height: 100px; overflow-y: auto">
               <el-button
-                v-for="(link, index) in originalLinks"
+                v-for="(link, index) in uniqueLinks"
                 :key="index"
                 style="margin: 5px; color: white; background-color: rgb(165, 171, 182)"
                 @click="filterGraphByLink(link)"
                 class="relation-button"
               >
-                {{ link.relationship }}
+                {{ link }}
               </el-button>
             </div>
           </div>
@@ -103,8 +105,7 @@
       >
         <div style="margin-top: 12px">
           <div
-            v-for="i in 3"
-            :key="i"
+            
             style="margin-bottom: 20px; margin-left: 10px; font-family: '阿里妈妈数黑体'"
           >
             <div
@@ -121,6 +122,127 @@
                 padding-right: 10px;
                 margin-bottom: 8px;
               "
+              @click="filterTradeType('fraudA')"
+            >
+              <span
+                style="
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 40px;
+                  margin-right: 5px;
+                  margin-left: 8px;
+                "
+                :style="{
+                  background: getRandomLightColor(),
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)',
+                }"
+              ></span>
+              <span style="margin-top: 1px">非法汇兑</span>
+            </div>
+            <div
+              style="
+                width: 95%;
+                height: 20px;
+                background: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+              "
+            >
+              <div
+                :style="{
+                  width: progress[1] + '%',
+                  height: '100%',
+                  background: getRandomLightColor(),
+                  borderRadius: '10px 0 0 10px',
+                  transition: 'width 0.3s ease',
+                }"
+                style="text-align: right"
+              >
+                {{ progress[1] + "%" }}
+              </div>
+            </div>
+          </div>
+          <div
+            
+            style="margin-bottom: 20px; margin-left: 10px; font-family: '阿里妈妈数黑体'"
+          >
+            <div
+              style="
+                display: flex;
+                width: fit-content;
+                height: 25px;
+                background-color: white;
+                border-radius: 20px;
+                border: 1px solid #ccc;
+                padding-top: 3px;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+                padding-right: 10px;
+                margin-bottom: 8px;
+              "
+              @click="filterTradeType('fraudB')"
+            >
+              <span
+                style="
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 40px;
+                  margin-right: 5px;
+                  margin-left: 8px;
+                "
+                :style="{
+                  background: getRandomLightColor(),
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)',
+                }"
+              ></span>
+              <span style="margin-top: 1px">非法集资</span>
+            </div>
+            <div
+              style="
+                width: 95%;
+                height: 20px;
+                background: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+              "
+            >
+              <div
+                :style="{
+                  width: progress[2] + '%',
+                  height: '100%',
+                  background: getRandomLightColor(),
+                  borderRadius: '10px 0 0 10px',
+                  transition: 'width 0.3s ease',
+                }"
+                style="text-align: right"
+              >
+                {{ progress[2] + "%" }}
+              </div>
+            </div>
+          </div>
+          <div
+            
+            style="margin-bottom: 20px; margin-left: 10px; font-family: '阿里妈妈数黑体'"
+          >
+            <div
+              style="
+                display: flex;
+                width: fit-content;
+                height: 25px;
+                background-color: white;
+                border-radius: 20px;
+                border: 1px solid #ccc;
+                padding-top: 3px;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+                padding-right: 10px;
+                margin-bottom: 8px;
+              "
+              @click="filterTradeType('fraudC')"
             >
               <span
                 style="
@@ -150,7 +272,7 @@
             >
               <div
                 :style="{
-                  width: progress[i] + '%',
+                  width: progress[3] + '%',
                   height: '100%',
                   background: getRandomLightColor(),
                   borderRadius: '10px 0 0 10px',
@@ -158,7 +280,7 @@
                 }"
                 style="text-align: right"
               >
-                {{ progress[i] + "%" }}
+                {{ progress[3] + "%" }}
               </div>
             </div>
           </div>
@@ -203,6 +325,7 @@ const nodes = ref([]);
 const links = ref([]);
 const originalNodes = ref([]);
 const originalLinks = ref([]);
+const uniqueLinks=ref([]);
 const simulation = ref(null);
 const progress = [0, 0, 0, 0];
 const reportContent = ref({
@@ -214,9 +337,67 @@ const reportContent = ref({
   reportText: "",
   reportid: 0,
 });
-import { getGraphService, getReportContentService } from "@/api/report.js";
-import { getEdges, getNodes } from "@/api/graph.js";
-import { useRoute } from "vue-router";
+const filterFraudUser=async()=>{
+  const fraudNodes = originalNodes.value.filter(node => node.isFraud === 1);
+  const fraudNodesSet = new Set(fraudNodes.map(node => node.name));
+  const filteredNodes = new Set();
+  const filteredLinks = [];
+   originalLinks.value.filter(
+
+    (link) => {
+    if (fraudNodesSet.has(link.source.name)|| fraudNodesSet.has(link.target.name)) {
+      filteredNodes.add(link.source);
+      filteredNodes.add(link.target);
+      filteredLinks.push(link);
+    }
+  } 
+  );
+  nodes.value = Array.from(filteredNodes);
+  links.value = filteredLinks;
+  drawGraph();
+}
+const filterTradeType = async (type) => {
+  const filteredNodes = new Set();
+  const filteredLinks = [];
+  if(type=="fraudA"){
+   
+  originalLinks.value.forEach((link) => {
+    if (link.fraudA == 1) {
+      filteredNodes.add(link.source);
+      filteredNodes.add(link.target);
+      filteredLinks.push(link);
+    }
+  });}
+  else if(type=="fraudB"){
+    originalLinks.value.forEach((link) => {
+      if (link.fraudB == 1) {
+        filteredNodes.add(link.source);
+        filteredNodes.add(link.target);
+        filteredLinks.push(link);
+      }
+    });
+  }
+  else if(type=="fraudC"){
+    originalLinks.value.forEach((link) => {
+      if (link.fraudC == 1) {
+        filteredNodes.add(link.source);
+        filteredNodes.add(link.target);
+        link.isFiltered = true; // 添加标记属性
+        filteredLinks.push(link);
+      }
+    });}
+  nodes.value = Array.from(filteredNodes);
+  links.value = filteredLinks;
+  console.log(links.value);
+ 
+
+  drawGraph();
+
+  console.log(nodes.value);
+  console.log(links.value);
+};
+import {  getReportContentService } from "@/api/report.js";
+import {getAccountNodes , getTransactionNodes} from "@/api/graph.js"; 
 const filterGraphByNode = (node) => {
   const filteredNodes = new Set();
   const filteredLinks = [];
@@ -230,14 +411,15 @@ const filterGraphByNode = (node) => {
   });
   nodes.value = Array.from(filteredNodes);
   links.value = filteredLinks;
+
   drawGraph();
 };
 const filterGraphByLink = (filterlink) => {
+
   const filteredNodes = new Set();
   const filteredLinks = [];
-  filteredLinks.push(filterlink);
   originalLinks.value.forEach((link) => {
-    if (link.relationship == filterlink.relationship) {
+    if (link.relationship == filterlink) {
       filteredNodes.add(link.source);
       filteredNodes.add(link.target);
       filteredLinks.push(link);
@@ -263,24 +445,30 @@ const fetchData = async (reportId) => {
     progress[3] = reportContent.value.itemc;
     nodes.value = [];
     links.value = [];
-    let result1 = await getEdges(graphId, "report");
-    let result2 = await getNodes(graphId, "report");
-    const savedNodes = result2.data;
-    const savedLinks = result1.data;
+    let resultAccountNodes = await getAccountNodes(reportId);
+    let resultTransactionNodes=await getTransactionNodes(reportId);
 
+    const savedNodes = resultAccountNodes.data;
+    const savedLinks = resultTransactionNodes.data;
+    console.log(savedNodes)
     for (let i = 0; i < savedNodes.length; i++) {
       nodes.value.push(savedNodes[i]);
     }
+   let relationshipnames=[]
     for (let i = 0; i < savedLinks.length; i++) {
-      savedLinks[i].source = savedNodes.find((n) => n.id == savedLinks[i].source.id);
-      savedLinks[i].target = savedNodes.find((n) => n.id == savedLinks[i].target.id);
+      savedLinks[i].source = savedNodes.find((n) => n.name == savedLinks[i].nameOrig);
+      savedLinks[i].target = savedNodes.find((n) => n.name == savedLinks[i].nameDest);
       savedLinks[i].id = savedLinks[i].relationshipId;
-      savedLinks[i].relationship = savedLinks[i].relationshipName;
-      savedLinks[i].weight = savedLinks[i].relationshipWeight;
+      savedLinks[i].relationship = savedLinks[i].type;
+      savedLinks[i].weight = savedLinks[i].amount;
       links.value.push(savedLinks[i]);
+      relationshipnames.push(savedLinks[i].relationship);
     }
+    uniqueLinks.value=Array.from( new Set(relationshipnames));
+    console.log(uniqueLinks.value);
     originalNodes.value = nodes.value;
     originalLinks.value = links.value;
+
     drawGraph();
   } catch (error) {
     console.error(error);
@@ -305,13 +493,15 @@ const drawGraph = () => {
 
   const svgGroup = svgElement.append("g");
 
-  // 定义箭头标记
-  svgElement
-    .append("defs")
+  // 动态定义箭头标记
+  const defs = svgElement.append("defs");
+
+  // 默认箭头（灰色）
+  defs
     .append("marker")
-    .attr("id", "arrowhead")
+    .attr("id", "arrowhead-default")
     .attr("viewBox", "-0 -5 10 10")
-    .attr("refX", 35) // 调整箭头位置
+    .attr("refX", 30) // 调整箭头位置
     .attr("refY", 0)
     .attr("orient", "auto")
     .attr("markerWidth", 5) // 放大箭头尺寸
@@ -320,6 +510,22 @@ const drawGraph = () => {
     .append("svg:path")
     .attr("d", "M 0,-5 L 10 ,0 L 0,5")
     .attr("fill", "#ccc")
+    .style("stroke", "none");
+
+  // 筛选后的箭头（红色）
+  defs
+    .append("marker")
+    .attr("id", "arrowhead-filtered")
+    .attr("viewBox", "-0 -5 10 10")
+    .attr("refX", 30) // 调整箭头位置
+    .attr("refY", 0)
+    .attr("orient", "auto")
+    .attr("markerWidth", 5) // 放大箭头尺寸
+    .attr("markerHeight", 5) // 放大箭头尺寸
+    .attr("xoverflow", "visible")
+    .append("svg:path")
+    .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+    .attr("fill", "red")
     .style("stroke", "none");
 
   // 力导向仿真
@@ -343,10 +549,15 @@ const drawGraph = () => {
     .data(links.value)
     .enter()
     .append("line")
-    .attr("stroke", "#ccc")
+    .attr("stroke", (d) => (d.isFiltered ? "red" : "#ccc")) // 根据标记设置颜色
     .attr("stroke-opacity", 0.6)
     .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrowhead)"); // 使用箭头标记
+      .on("click", showTooltipLink) // 点击事件
+
+
+    .attr("marker-end", (d) =>
+      d.isFiltered ? "url(#arrowhead-filtered)" : "url(#arrowhead-default)"
+    ); // 根据标记设置箭头
 
   // 定义节点
   const node = svgGroup
@@ -357,8 +568,8 @@ const drawGraph = () => {
     .enter()
     .append("circle")
     .attr("r", (d) => d.age / 5 + 20) // 调整大小
-    .attr("fill", () => `hsl(${Math.random() * 360}, 100%, 80%)`) // 使用浅色系随机颜色
-    .on("click", showTooltip) // 点击事件
+    .attr("fill", (d) => d.isFraud === 1 ? "red" : `hsl(${Math.random() * 360}, 100%, 80%)`) // 如果isFraud为1，则使用红色，否则使用随机浅色
+    .on("click", showTooltipNode) // 点击事件
     .on("mouseover", function () {
       d3.select(this).attr("stroke", "orange").attr("stroke-width", 3);
     })
@@ -420,28 +631,53 @@ const drawGraph = () => {
   simulation.value.force("link").links(links.value);
 };
 
-const showTooltip = (event, d) => {
+const showTooltipNode = (event, d) => {
   // Update tooltip content
   const tooltipElement = d3.select(tooltip.value);
   tooltipElement
     .style("opacity", 1)
     .style("left", event.pageX + 5 + "px") // Update left position
     .style("top", event.pageY - 28 + "px") // Update top position
-    .html(formatTooltipContent(d)); // Format content
+    .html(formatTooltipContentNode(d)); // Format content
 };
-
+const showTooltipLink = (event, d) => {
+  // Update tooltip content
+  const tooltipElement = d3.select(tooltip.value);
+  tooltipElement
+      .style("opacity", 1)
+      .style("left", event.pageX + 5 + "px") // Update left position
+      .style("top", event.pageY - 28 + "px") // Update top position
+      .html(formatTooltipContentLink(d)); // Format content
+};
 const hideTooltip = () => {
   const tooltipElement = d3.select(tooltip.value);
   tooltipElement.style("opacity", 0);
 };
 
-const formatTooltipContent = (d) => {
+const formatTooltipContentNode = (d) => {
   // Format the tooltip content using node attributes
   return `
-    <strong>Name:</strong> ${d.name}<br/>
-    <strong>Age:</strong> ${d.age}<br/>
-    <strong>Gender:</strong> ${d.gender || "N/A"}<br/>
-    <strong>Occupation:</strong> ${d.occupation || "N/A"}<br/>
+ <strong>Name:</strong> ${d.name}<br/>
+ <strong>isFraud:</strong>${d.isFraud}<br/>
+`;
+};
+const formatTooltipContentLink = (d) => {
+  // Format the tooltip content using node attributes
+  return `
+
+  <strong>amount:</strong>${d.amount}<br/>
+<strong>isFlaggedFraud:</strong> ${d.isFlaggedFraud}<br/>
+<strong>isFraud:</strong> ${d.isFraud}<br/>
+<strong>nameDest:</strong> ${d.nameDest}<br/>
+<strong>nameOrig:</strong> ${d.nameOrig}<br/>
+<strong>newbalanceDest:</strong> ${d.newbalanceDest}<br/>
+<strong>newbalanceOrig:</strong> ${d.newbalanceOrig}<br/>
+<strong>oldbalanceDest:</strong> ${d.oldbalanceDest}<br/>
+<strong>oldbalanceOrg:</strong> ${d.oldbalanceOrg}<br/>
+<strong>fraudA:</strong> ${d.fraudA}<br/>
+<strong>fraudB:</strong> ${d.fraudB}<br/>
+<strong>fraudC:</strong> ${d.fraudC}<br/>
+
   `;
 };
 
@@ -473,11 +709,10 @@ const getRandomLightColor = () => {
 import { useReportIdStore } from "@/stores/report";
 const reportStore = useReportIdStore();
 onMounted(() => {
-  // Hide tooltip on mouse leave
   d3.select(tooltip.value).style("opacity", 0);
-  d3.select(svg.value).on("mouseleave", hideTooltip); // Hide tooltip on mouse leave
+  d3.select(svg.value).on("mouseleave", hideTooltip);
   const reportId = reportStore.id;
-  console.log(reportId);
+
   fetchData(reportId);
 });
 </script>

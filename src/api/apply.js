@@ -7,7 +7,7 @@ export const newApplyService = (
 ) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('currentItem', currentItem);
+    formData.append('algorithm', currentItem);
     formData.append('multialgo', selectedAlgorithm);
     formData.append('datawrite', allowDataRecord);
 
@@ -17,3 +17,4 @@ export const newApplyService = (
         }
     });
 }
+ 
